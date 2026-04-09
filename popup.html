@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MouthScroll</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <span class="logo">👄</span>
+    <div class="title-wrap">
+      <h1>MouthScroll</h1>
+      <p class="subtitle">Hands-free Shorts &amp; Reels</p>
+    </div>
+    <!-- Master ON/OFF toggle -->
+    <label class="toggle" title="Enable / Disable MouthScroll">
+      <input type="checkbox" id="chk-enabled" />
+      <span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <section id="controls">
+
+    <!-- Sensitivity slider -->
+    <div class="row">
+      <label for="slider-sensitivity">
+        Sensitivity
+        <span class="hint" id="hint-sensitivity">–</span>
+      </label>
+      <div class="slider-wrap">
+        <span class="slider-label">Low</span>
+        <input type="range" id="slider-sensitivity"
+               min="0.15" max="0.60" step="0.01" />
+        <span class="slider-label">High</span>
+      </div>
+    </div>
+
+    <!-- Eyebrow sensitivity slider -->
+    <div class="row">
+      <label for="slider-brow">
+        Brow sensitivity
+        <span class="hint" id="hint-brow">–</span>
+      </label>
+      <div class="slider-wrap">
+        <span class="slider-label">Low</span>
+        <input type="range" id="slider-brow"
+               min="0.15" max="0.45" step="0.01" />
+        <span class="slider-label">High</span>
+      </div>
+    </div>
+
+    <!-- Cooldown slider -->
+    <div class="row">
+      <label for="slider-cooldown">
+        Cooldown
+        <span class="hint" id="hint-cooldown">–</span>
+      </label>
+      <div class="slider-wrap">
+        <span class="slider-label">Fast</span>
+        <input type="range" id="slider-cooldown"
+               min="500" max="3000" step="100" />
+        <span class="slider-label">Slow</span>
+      </div>
+    </div>
+
+    <!-- Camera preview toggle -->
+    <div class="row row-inline">
+      <label for="chk-preview">Show camera preview</label>
+      <label class="toggle small">
+        <input type="checkbox" id="chk-preview" />
+        <span class="track"><span class="thumb"></span></span>
+      </label>
+    </div>
+
+  </section>
+
+  <footer>
+    <p class="note">😮 open+close → next &nbsp;|&nbsp; 🤨 brows up → prev</p>
+    <p class="note">On YouTube videos: 😮 → pause/resume</p>
+    <p class="note dim">All processing is 100% local &amp; private.</p>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

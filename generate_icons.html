@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+  MouthScroll — generate_icons.html
+  Open this file in Chrome, then right-click each image and Save As:
+    icons/icon16.png
+    icons/icon48.png
+    icons/icon128.png
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generate Icons</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    .icon-set { display: flex; gap: 20px; align-items: flex-end; margin: 20px 0; }
+    figure { text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px #0002; }
+    figcaption { font-size: 12px; margin-top: 6px; color: #555; }
+    button { margin: 10px 4px; padding: 8px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>MouthScroll Icon Generator</h2>
+  <p>Click "Download All Icons" to save all three sizes automatically.</p>
+
+  <div class="icon-set" id="previews"></div>
+  <button onclick="downloadAll()">⬇ Download All Icons</button>
+
+  <script>
+    const SIZES = [16, 48, 128];
+    const canvases = {};
+
+    function drawIcon(size) {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const s = size;
+
+      // Background gradient
+      const grad = ctx.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+      grad.addColorStop(0, '#ff6b9d');
+      grad.addColorStop(1, '#c0392b');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, s, s, s * 0.2);
+      ctx.fill();
+
+      // Mouth emoji drawn with canvas
+      const fontSize = s * 0.6;
+      ctx.font = `${fontSize}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('👄', s / 2, s / 2);
+
+      return c;
+    }
+
+    // Render previews
+    const wrap = document.getElementById('previews');
+    SIZES.forEach(size => {
+      const c = drawIcon(size);
+      canvases[size] = c;
+      const fig = document.createElement('figure');
+      fig.appendChild(c);
+      const cap = document.createElement('figcaption');
+      cap.textContent = `${size}×${size}`;
+      fig.appendChild(cap);
+      wrap.appendChild(fig);
+    });
+
+    function downloadAll() {
+      SIZES.forEach(size => {
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvases[size].toDataURL('image/png');
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>

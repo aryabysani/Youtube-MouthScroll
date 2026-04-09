@@ -1,0 +1,140 @@
+/* ============================================================
+   MouthScroll — content.css
+   Floating overlay injected into Shorts / Reels pages
+   ============================================================ */
+
+#ms-overlay {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647; /* always on top */
+  width: 200px;
+  background: rgba(15, 15, 20, 0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #eee;
+  user-select: none;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Header bar ──────────────────────────────────────── */
+#ms-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.06);
+  cursor: grab;
+}
+#ms-header:active { cursor: grabbing; }
+
+#ms-logo  { font-size: 16px; line-height: 1; }
+#ms-title { flex: 1; font-weight: 600; font-size: 13px; letter-spacing: 0.3px; }
+
+#ms-collapse {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+#ms-collapse:hover { color: #fff; }
+
+/* ── Body ────────────────────────────────────────────── */
+#ms-body { padding: 10px; }
+
+/* ── Camera preview ──────────────────────────────────── */
+#ms-preview-wrap {
+  position: relative;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  line-height: 0;
+}
+
+#ms-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  transform: scaleX(-1); /* mirror for natural feel */
+  border-radius: 8px;
+}
+
+/* ── Indicator dots row ──────────────────────────────── */
+#ms-dots {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.ms-dot-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.ms-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  transition: background 0.1s, transform 0.12s, box-shadow 0.12s;
+}
+
+/* Mouth active (orange) */
+.ms-dot.ms-active {
+  background: #ff9f0a;
+  box-shadow: 0 0 7px rgba(255,159,10,0.85);
+  transform: scale(1.2);
+}
+
+/* Brow active (sky blue) */
+.ms-dot.ms-active-brow {
+  background: #0af;
+  box-shadow: 0 0 7px rgba(0,170,255,0.85);
+  transform: scale(1.2);
+}
+
+/* Triggered flash (green) */
+.ms-dot.ms-triggered,
+.ms-dot.ms-triggered-brow {
+  background: #30d158 !important;
+  box-shadow: 0 0 12px rgba(48,209,88,0.95) !important;
+  transform: scale(1.45) !important;
+}
+
+/* ── Mode label ──────────────────────────────────────── */
+#ms-mode-label {
+  text-align: center;
+  font-size: 10px;
+  color: #666;
+  letter-spacing: 0.2px;
+  margin-bottom: 4px;
+}
+
+/* ── Status text ─────────────────────────────────────── */
+#ms-status {
+  text-align: center;
+  font-size: 11px;
+  color: #bbb;
+  line-height: 1.4;
+  padding: 2px 0;
+  min-height: 18px;
+}
