@@ -1,0 +1,20 @@
+{
+  "name": "youtube-mouthscroll",
+  "version": "1.1.0",
+  "description": "Chrome extension: scroll YouTube Shorts, Instagram Reels and long YouTube videos hands-free using mouth and eyebrow gestures.",
+  "license": "MIT",
+  "author": "Arya Bysani",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aryabysani/Youtube-MouthScroll.git"
+  },
+  "homepage": "https://github.com/aryabysani/Youtube-MouthScroll#readme",
+  "private": true,
+  "scripts": {
+    "icons": "node gen_icons_node.js",
+    "icons:preview": "node gen_icons_node.js --ascii",
+    "models": "node download_models.js"
+  },
+  "comment": "The extension itself has no dependencies. The scripts above use only Node built-ins, and face-api.js is vendored in libs/.",
+  "dependencies": {}
+}

@@ -1,129 +1,115 @@
-# MouthScroll — Setup Guide
+# MouthScroll — Developer Setup
 
-Open your mouth → next video. Works on YouTube Shorts and Instagram Reels.
+Just want to install and use it? See the [README](README.md) — you don't need
+anything on this page.
+
+This page is for working on the code.
 
 ---
 
-## Folder Structure (after setup)
+## Nothing to install
+
+There is no build step, no bundler, and no npm dependencies. The face
+detection library and its model weights are **committed to the repo** so the
+extension runs straight from a ZIP download.
 
 ```
-mouthscroll/
-├── manifest.json
-├── background.js
-├── content.js
-├── content.css
-├── popup.html
-├── popup.js
-├── popup.css
-├── generate_icons.html
+Youtube-MouthScroll/
+├── manifest.json              Manifest V3
+├── background.js              service worker — defaults, SPA nav events
+├── content.js                 face tracking, gestures, page overlay
+├── content.css                overlay styling
+├── popup.html / .css / .js    toolbar settings panel
+├── gen_icons_node.js          icon generator (Node built-ins only)
+├── download_models.js         re-downloads libs/ and models/
 ├── icons/
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
+│   ├── icon16.png             solid mark — toolbar
+│   ├── icon48.png             solid mark — extensions page
+│   └── icon128.png            dot-matrix mark — store / details
 ├── libs/
-│   └── face-api.min.js       ← download this (step 1)
+│   └── face-api.min.js        vendored, committed
 └── models/
     ├── tiny_face_detector_model-weights_manifest.json
     ├── tiny_face_detector_model-shard1
     ├── face_landmark_68_tiny_model-weights_manifest.json
-    └── face_landmark_68_tiny_model-shard1   ← download these (step 2)
+    └── face_landmark_68_tiny_model-shard1
 ```
+
+## Load it in Chrome
+
+1. `chrome://extensions`
+2. Turn on **Developer mode** (top-right).
+3. **Load unpacked** → select this folder.
+4. After editing, click **reload** ↻ on the extension card. Content-script
+   changes also need a page refresh.
 
 ---
 
-## Step 1 — Download face-api.js
-
-1. Go to: https://github.com/justadudewhohacks/face-api.js/releases
-2. Download the latest release ZIP.
-3. Inside the ZIP, find `dist/face-api.min.js`.
-4. Copy it to: `libs/face-api.min.js`
-
-**OR** run in a terminal (Node.js required):
-```bash
-npx --yes download-file https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.min.js -o libs/face-api.min.js
-```
-
----
-
-## Step 2 — Download face-api.js models
-
-You need two models:
-- **TinyFaceDetector** — detects the face
-- **FaceLandmark68TinyNet** — gets the 68 lip/eye landmarks
-
-Download the `models/` folder from the face-api.js GitHub repo:
+## Scripts
 
 ```bash
-# Option A: use the provided download script
-node download_models.js
-
-# Option B: manual download
-# Go to: https://github.com/justadudewhohacks/face-api.js/tree/master/weights
-# Download these 4 files into your models/ folder:
-#   tiny_face_detector_model-weights_manifest.json
-#   tiny_face_detector_model-shard1
-#   face_landmark_68_tiny_model-weights_manifest.json
-#   face_landmark_68_tiny_model-shard1
+node gen_icons_node.js           # regenerate icons/
+node gen_icons_node.js --ascii   # print the icon glyph as text, write nothing
+node download_models.js          # re-fetch libs/face-api.min.js and models/
 ```
 
-Run the download script (creates `models/` automatically):
-```bash
-node download_models.js
-```
+### Icons
+
+`gen_icons_node.js` is the single source of truth for the icons — it writes
+PNGs by hand with `zlib`, no image library involved.
+
+The mark is a dot-matrix open mouth: white lips, red opening, black squircle.
+The matrix is a hand-authored ASCII pattern near the top of the file; edit
+that string art to change the glyph, then run `--ascii` to check it before
+generating. Below about 64px a dot matrix turns to mush, so 16px and 48px
+render the same shape in solid form instead.
+
+### Models
+
+Only needed if the committed weights ever have to be refreshed. Sources:
+
+- face-api.js — <https://github.com/justadudewhohacks/face-api.js>
+- weights — <https://github.com/justadudewhohacks/face-api.js/tree/master/weights>
 
 ---
 
-## Step 3 — Generate Icons
+## How the detection works
 
-1. Open `generate_icons.html` in Chrome.
-2. Click **⬇ Download All Icons**.
-3. Save each file into the `icons/` folder as prompted.
+`TinyFaceDetector` finds the face; `FaceLandmark68TinyNet` gives 68 landmarks.
 
----
+- **Mouth openness** — distance between landmarks 51 and 57 (upper to lower
+  lip), divided by the distance between the eye corners (36 to 45).
+- **Brow raise** — average gap between the five brow points and the upper eye
+  lid on each side, divided by the same eye-corner distance.
 
-## Step 4 — Load the Extension in Chrome
+Dividing by eye-corner distance is what makes both measures independent of how
+near you are to the camera.
 
-1. Open Chrome → `chrome://extensions`
-2. Enable **Developer mode** (top-right toggle).
-3. Click **Load unpacked**.
-4. Select this folder (`mouthscroll/`).
-5. The extension icon (👄) will appear in the toolbar.
+Each gesture is a state machine, so an action fires on a *transition*
+(open → closed), not while the gesture is held. The exception is brow-hold on
+long videos, which repeats +5s every 500 ms. A shared cooldown stops both from
+double-firing.
 
----
+## Settings
 
-## Step 5 — Usage
+Stored in `chrome.storage.sync`: `enabled`, `sensitivity`, `browSensitivity`,
+`showPreview`, `cooldown`, `collapsed`.
 
-1. Go to **YouTube Shorts** (`youtube.com/shorts/...`) or **Instagram Reels** (`instagram.com/reels/`).
-2. The floating MouthScroll panel will appear in the bottom-right corner.
-3. Allow camera access when prompted.
-4. **Open your mouth** (hold briefly) then **close it** → the next video plays.
+`background.js` fills in only the keys that have never been set.
+`chrome.runtime.onInstalled` also fires on extension update and on every
+reload of an unpacked extension, so writing all the defaults there would wipe
+the user's saved settings — which used to switch the extension, and the
+camera, back on by itself.
 
-### Popup Controls
+## Testing a change
 
-| Control | Description |
-|---------|-------------|
-| ON/OFF toggle | Enable or disable the extension entirely |
-| Sensitivity slider | How wide you need to open your mouth (Low = wider required) |
-| Cooldown slider | Minimum time between consecutive scrolls (0.5s – 3s) |
-| Show camera preview | Show/hide the small camera feed in the overlay |
+There are three surfaces and their gestures differ, so check all three:
 
----
+| URL | Mouth | Brows |
+|---|---|---|
+| `youtube.com/shorts/…` | next | previous |
+| `instagram.com/reels/` | next | previous |
+| `youtube.com/watch?v=…` | play / pause | hold to skip +5s |
 
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| "Models missing" status | Check that all 4 model files are in `models/` |
-| Camera access denied | Click the camera icon in Chrome's address bar and allow access |
-| No face detected | Improve lighting; sit closer to the camera |
-| Scrolling too sensitive | Move the Sensitivity slider to the left (Low) |
-| Scrolling too easily triggered | Increase Cooldown slider |
-| Extension not activating on Instagram | Instagram may require you to be on `/reels/` tab |
-
----
-
-## Privacy
-
-- All face detection runs **locally in your browser** using TensorFlow.js.
-- **No video, images, or biometric data** are sent to any server.
-- Camera is only active while you are on a supported page and the extension is enabled.
+Watch the live numbers in the overlay (`MTH 0.42 · BRW 0.19 · THR 0.30`) while
+tuning sensitivity.
