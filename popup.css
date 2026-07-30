@@ -1,150 +1,278 @@
 /* ============================================================
    MouthScroll — popup.css
+   Monochrome, dot-matrix, one red accent. Uppercase mono type.
    ============================================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  width: 280px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 13px;
-  color: #1c1c1e;
-  background: #f2f2f7;
+:root {
+  --bg:      #000;
+  --card:    #0d0d0d;
+  --line:    #202020;
+  --line-hi: #2e2e2e;
+  --fg:      #fff;
+  --mid:     #8a8a8a;
+  --dim:     #565656;
+  --red:     #d71921;
+
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 }
+
+body {
+  width: 296px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* micro-label: the workhorse type style */
+h1,
+.subtitle,
+.row label,
+.slider-label,
+.legend,
+.note { text-transform: uppercase; }
+/* .hint is deliberately NOT uppercased — it carries the lowercase "s" unit */
 
 /* ── Header ──────────────────────────────────────────── */
 header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5ea;
+  gap: 11px;
+  padding: 15px 16px 14px;
+  border-bottom: 1px solid var(--line);
 }
 
-.logo { font-size: 28px; line-height: 1; }
+.logo { width: 33px; height: 33px; flex: none; }
+.logo .lip  { fill: var(--fg); }
+.logo .open { fill: var(--red); }
 
-.title-wrap { flex: 1; }
-h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-.subtitle { font-size: 11px; color: #8e8e93; margin-top: 1px; }
+.title-wrap { flex: 1; min-width: 0; }
 
-/* ── Controls section ────────────────────────────────── */
+h1 {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+}
+
+.subtitle {
+  margin-top: 3px;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+
+/* ── Controls ────────────────────────────────────────── */
 #controls {
-  padding: 12px 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
+/* every control is its own widget block */
 .row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 11px;
+  padding: 13px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
 }
 
 .row label {
-  font-weight: 600;
-  font-size: 12px;
-  color: #3a3a3c;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-.hint {
+  align-items: baseline;
+  gap: 8px;
+  font-size: 9px;
   font-weight: 400;
-  color: #8e8e93;
-  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mid);
 }
 
+/* the live value — the one piece of big type.
+   text-transform is reset, not merely unset: it would inherit from .row label
+   and turn the "1.5s" unit into "1.5S". */
+.hint {
+  text-transform: none;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Sliders ─────────────────────────────────────────── */
 .slider-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 9px;
 }
 
 .slider-label {
-  font-size: 10px;
-  color: #aeaeb2;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--dim);
   white-space: nowrap;
 }
 
 input[type="range"] {
   flex: 1;
   -webkit-appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #d1d1d6;
+  height: 14px;              /* hit area; the visible track is the gradient */
+  background: linear-gradient(var(--line-hi), var(--line-hi)) center / 100% 2px no-repeat;
   outline: none;
   cursor: pointer;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #007aff;
-  box-shadow: 0 2px 6px rgba(0,122,255,0.35);
+  background: var(--fg);
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.12s ease, background 0.12s ease;
 }
-input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.15); }
+input[type="range"]:hover::-webkit-slider-thumb { background: var(--red); }
+input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.25); background: var(--red); }
+input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(215,25,33,0.35); }
 
-/* Row inline (label + toggle side by side) */
+/* label + toggle on one line */
 .row-inline {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 .row-inline label:first-child {
-  font-weight: 600;
-  font-size: 12px;
-  color: #3a3a3c;
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--mid);
+  text-transform: uppercase;
 }
 
-/* ── Toggle switch ───────────────────────────────────── */
-.toggle { display: inline-flex; align-items: center; cursor: pointer; }
-.toggle input { display: none; }
+/* ── Toggles ─────────────────────────────────────────── */
+.toggle { display: inline-flex; align-items: center; cursor: pointer; flex: none; }
+.toggle input { position: absolute; opacity: 0; pointer-events: none; }
 
 .track {
   position: relative;
-  width: 44px;
-  height: 26px;
-  background: #d1d1d6;
-  border-radius: 13px;
-  transition: background 0.2s;
+  display: block;
+  width: 42px;
+  height: 23px;
+  background: transparent;
+  border: 1px solid var(--line-hi);
+  border-radius: 999px;
+  transition: background 0.18s ease, border-color 0.18s ease;
 }
 .thumb {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
+  width: 15px;
+  height: 15px;
+  background: var(--dim);
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-  transition: left 0.2s, transform 0.1s;
+  transition: left 0.18s ease, background 0.18s ease;
 }
 
-.toggle input:checked + .track { background: #34c759; }
-.toggle input:checked + .track .thumb { left: 21px; }
-.toggle input:checked + .track .thumb:active { transform: scale(0.92); }
+.toggle input:checked + .track {
+  background: var(--red);
+  border-color: var(--red);
+}
+.toggle input:checked + .track .thumb { left: 22px; background: var(--fg); }
+.toggle input:focus-visible + .track { box-shadow: 0 0 0 3px rgba(215,25,33,0.35); }
 
 /* Small variant */
-.toggle.small .track { width: 36px; height: 22px; border-radius: 11px; }
-.toggle.small .thumb { width: 16px; height: 16px; top: 3px; left: 3px; }
-.toggle.small input:checked + .track .thumb { left: 17px; }
+.toggle.small .track { width: 36px; height: 20px; }
+.toggle.small .thumb { width: 13px; height: 13px; top: 2.5px; left: 2.5px; }
+.toggle.small input:checked + .track .thumb { left: 20px; }
 
 /* ── Footer ──────────────────────────────────────────── */
 footer {
-  padding: 10px 16px 14px;
-  border-top: 1px solid #e5e5ea;
-  background: #fff;
+  padding: 13px 16px 15px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
+/* one block per surface: Shorts/Reels vs long-form video */
+.mode {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mode-name {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--line);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+}
+
+.legend .key {
+  padding: 3px 7px 2px;
+  border: 1px solid var(--line-hi);
+  border-radius: 999px;
+  color: var(--fg);
+}
+.legend .arrow { color: var(--dim); }
+.legend .act   { color: var(--mid); }
+/* keeps unit suffixes lowercase inside the uppercased legend ("+5s", not "+5S") */
+.legend .unit  { text-transform: none; }
+
+/* dot divider between the two halves of the first legend row */
+.dot-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--line-hi);
+  margin: 0 2px;
+  flex: none;
+}
+
 .note {
-  font-size: 11px;
-  color: #636366;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  letter-spacing: 0.12em;
   line-height: 1.5;
-  text-align: center;
 }
-.note.dim { color: #aeaeb2; margin-top: 2px; }
+.note.dim { color: var(--dim); margin-top: 1px; }
+
+/* recording-style live dot */
+.live {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--red);
+  flex: none;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live { animation: none; }
+  input[type="range"]::-webkit-slider-thumb,
+  .track, .thumb { transition: none; }
+}

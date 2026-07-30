@@ -1,5 +1,7 @@
 // MouthScroll — icon generator (no npm deps, pure Node.js)
-// Draws a deep purple pill with white lips + eyebrows
+// Dot-matrix glyph on a black squircle. Monochrome + one red accent.
+//   node gen_icons_node.js          → writes icons/icon{16,48,128}.png
+//   node gen_icons_node.js --ascii  → prints the glyph grid, writes nothing
 
 const fs   = require('fs');
 const path = require('path');
@@ -25,10 +27,11 @@ function chunk(type, data) {
   return Buffer.concat([len, tb, data, crc]);
 }
 function buildPNG(pixels, size) {
-  const rows = Buffer.alloc(size * (size * 4 + 1));
+  const stride = size * 4 + 1;
+  const rows = Buffer.alloc(size * stride);
   for (let y = 0; y < size; y++) {
-    rows[y * (size * 4 + 1)] = 0;
-    pixels.copy(rows, y * (size * 4 + 1) + 1, y * size * 4, (y + 1) * size * 4);
+    rows[y * stride] = 0;
+    pixels.copy(rows, y * stride + 1, y * size * 4, (y + 1) * size * 4);
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4);
@@ -36,35 +39,32 @@ function buildPNG(pixels, size) {
   return Buffer.concat([
     Buffer.from([137,80,78,71,13,10,26,10]),
     chunk('IHDR', ihdr),
-    chunk('IDAT', zlib.deflateSync(rows)),
+    chunk('IDAT', zlib.deflateSync(rows, { level: 9 })),
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
 
-// ── Per-pixel drawing ────────────────────────────────────────
-function lerp(a, b, t) { return a + (b - a) * t; }
+// ── Geometry ─────────────────────────────────────────────────
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 // Signed distance to a rounded rectangle
 function sdRoundRect(px, py, cx, cy, hw, hh, r) {
   const qx = Math.abs(px - cx) - hw + r;
   const qy = Math.abs(py - cy) - hh + r;
-  return Math.min(Math.max(qx, qy), 0) + Math.sqrt(Math.max(qx,0)**2 + Math.max(qy,0)**2) - r;
+  return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx,0), Math.max(qy,0)) - r;
 }
+function sdCircle(px, py, cx, cy, r) { return Math.hypot(px - cx, py - cy) - r; }
 
-// Signed distance to ellipse (approximate)
+// Approximate signed distance to an ellipse, scaled back to pixel units
 function sdEllipse(px, py, cx, cy, rx, ry) {
-  const dx = (px - cx) / rx;
-  const dy = (py - cy) / ry;
-  return Math.sqrt(dx*dx + dy*dy) - 1;
+  const dx = (px - cx) / rx, dy = (py - cy) / ry;
+  return (Math.hypot(dx, dy) - 1) * Math.min(rx, ry);
 }
 
-// AA fill: returns 0-255 alpha based on SDF
-function aa(d, feather = 1.2) {
-  return clamp(Math.round((-d / feather + 0.5) * 255), 0, 255);
-}
+// SDF → coverage 0..255
+function aa(d, feather) { return clamp(Math.round((-d / feather + 0.5) * 255), 0, 255); }
 
-// Blend src (premult) over dst
+// src over dst, both straight alpha
 function blend(dR,dG,dB,dA, sR,sG,sB,sA) {
   const sa = sA / 255, da = dA / 255;
   const oA = sa + da * (1 - sa);
@@ -77,84 +77,62 @@ function blend(dR,dG,dB,dA, sR,sG,sB,sA) {
   ];
 }
 
-function drawIcon(size) {
-  const px = Buffer.alloc(size * size * 4); // start transparent
+// ── Palette ──────────────────────────────────────────────────
+const BLACK = [ 10,  10,  10];
+const WHITE = [255, 255, 255];
+const RED   = [215,  25,  33];   // Nothing red
 
+// ── The glyph: an open mouth, drawn as a dot matrix ──────────
+// '.' = empty, '@' = white dot (lips), 'o' = red dot (the opening)
+// Deliberately wide and flat so it reads as a mouth, not an eye.
+const GLYPH = [
+  '...........',
+  '...........',
+  '...........',
+  '.@@@@@@@@@.',
+  '@@ooooooo@@',
+  '@@ooooooo@@',
+  '.@@ooooo@@.',
+  '..@@@@@@@..',
+  '...........',
+  '...........',
+  '...........',
+];
+const GRID = GLYPH.length;
+
+function glyphGrid() {
+  return GLYPH.map(row =>
+    [...row].map(ch => (ch === '@' ? 1 : ch === 'o' ? 2 : 0))
+  );
+}
+
+// A dot matrix turns to mush below ~64px, so the small icons state the same
+// shape in solid form: white lip ring, red opening.
+function drawSmallIcon(size) {
+  const px = Buffer.alloc(size * size * 4);
   const cx = size / 2, cy = size / 2;
-  const pad = size * 0.06;
-  const hw = size / 2 - pad;       // half-width of background rect
-  const hh = size / 2 - pad;
-  const r  = size * 0.22;          // corner radius
+  const pad = size * 0.035;
+  const hw = size / 2 - pad;
+  const r  = size * 0.235;
+
+  const rx = size * 0.36, ry = size * 0.215;
+  const ring = Math.max(size * 0.105, 1.4);   // lip thickness
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const i = (y * size + x) * 4;
       let R = 0, G = 0, B = 0, A = 0;
+      const sx = x + 0.5, sy = y + 0.5;
 
-      // ── 1. Background: deep purple → indigo gradient ─────
-      const bgDist = sdRoundRect(x, y, cx, cy, hw, hh, r);
-      const bgA = aa(bgDist, 1.5);
-      if (bgA > 0) {
-        const t = clamp((x + y) / (size * 1.6), 0, 1);
-        const bR = Math.round(lerp(88, 50, t));   // purple → deep indigo
-        const bG = Math.round(lerp(28, 10, t));
-        const bB = Math.round(lerp(180, 130, t));
-        [R,G,B,A] = blend(R,G,B,A, bR,bG,bB, bgA);
-      }
+      const bgA = aa(sdRoundRect(sx, sy, cx, cy, hw, hw, r), 1.0);
+      if (bgA === 0) { px[i+3] = 0; continue; }
+      [R,G,B,A] = blend(R,G,B,A, BLACK[0],BLACK[1],BLACK[2], bgA);
 
-      // ── 2. Inner glow (lighter center) ─────────────────
-      const glowD = sdRoundRect(x, y, cx, cy*0.95, hw*0.7, hh*0.55, r*0.8);
-      const glowA = Math.round(clamp(-glowD / (size*0.3), 0, 1) * 30);
-      if (glowA > 0) [R,G,B,A] = blend(R,G,B,A, 160,120,255, glowA);
+      const lipA = aa(sdEllipse(sx, sy, cx, cy, rx, ry), 0.9);
+      if (lipA > 0) [R,G,B,A] = blend(R,G,B,A, WHITE[0],WHITE[1],WHITE[2], Math.min(lipA, bgA));
 
-      // ── 3. Eyebrows (two arched thick lines) ────────────
-      // Left brow: arc from (-0.30, -0.22) to (-0.07, -0.28) relative to center
-      // Model as a rotated ellipse outline
-      const browY  = cy - size * 0.20;
-      const browHH = size * 0.028;  // half-height (thickness)
-
-      // Left brow
-      const lbCX = cx - size * 0.165;
-      const lbDist = sdEllipse(x, y + size*0.025, lbCX, browY, size*0.13, size*0.04);
-      // Clip to top half of ellipse (arch shape)
-      const lbInner = sdEllipse(x, y + size*0.025, lbCX, browY, size*0.08, size*0.01);
-      const lbA = (y < browY + browHH*0.5)
-        ? Math.min(aa(lbDist, 1.2), aa(-lbInner + size*0.025, 1.2))
-        : 0;
-      if (lbA > 0) [R,G,B,A] = blend(R,G,B,A, 255,255,255, Math.min(lbA, A > 0 ? 255 : 0));
-
-      // Right brow (mirror)
-      const rbCX = cx + size * 0.165;
-      const rbDist = sdEllipse(x, y + size*0.025, rbCX, browY, size*0.13, size*0.04);
-      const rbInner = sdEllipse(x, y + size*0.025, rbCX, browY, size*0.08, size*0.01);
-      const rbA = (y < browY + browHH*0.5)
-        ? Math.min(aa(rbDist, 1.2), aa(-rbInner + size*0.025, 1.2))
-        : 0;
-      if (rbA > 0) [R,G,B,A] = blend(R,G,B,A, 255,255,255, Math.min(rbA, A > 0 ? 255 : 0));
-
-      // ── 4. Upper lip (fat arc) ───────────────────────────
-      const lipY   = cy + size * 0.06;
-      const ulCX   = cx;
-      const ulDist = sdEllipse(x, y, ulCX, lipY - size*0.06, size*0.28, size*0.13);
-      const ulHoleDist = sdEllipse(x, y, ulCX, lipY - size*0.06, size*0.20, size*0.07);
-      // Only bottom half → lip arch
-      const ulA = (y > lipY - size*0.13 && y < lipY + size*0.02)
-        ? Math.min(aa(ulDist, 1.2), aa(-ulHoleDist, 1.2))
-        : 0;
-      if (ulA > 0) [R,G,B,A] = blend(R,G,B,A, 255,220,225, Math.min(ulA, A > 0 ? 255 : 0));
-
-      // ── 5. Lower lip (fatter ellipse) ───────────────────
-      const llDist = sdEllipse(x, y, cx, lipY + size*0.09, size*0.27, size*0.10);
-      const llHoleDist = sdEllipse(x, y, cx, lipY + size*0.09, size*0.19, size*0.04);
-      const llA = (y > lipY)
-        ? Math.min(aa(llDist, 1.2), aa(-llHoleDist + size*0.04, 1.2))
-        : 0;
-      if (llA > 0) [R,G,B,A] = blend(R,G,B,A, 255,200,210, Math.min(llA, A > 0 ? 255 : 0));
-
-      // ── 6. Teeth (white gap between lips) ───────────────
-      const teethDist = sdEllipse(x, y, cx, lipY + size*0.02, size*0.17, size*0.05);
-      const teethA = aa(teethDist, 1.0);
-      if (teethA > 0 && A > 0) [R,G,B,A] = blend(R,G,B,A, 245,240,245, teethA);
+      const openA = aa(sdEllipse(sx, sy, cx, cy, rx - ring, ry - ring), 0.9);
+      if (openA > 0) [R,G,B,A] = blend(R,G,B,A, RED[0],RED[1],RED[2], Math.min(openA, bgA));
 
       px[i]=R; px[i+1]=G; px[i+2]=B; px[i+3]=A;
     }
@@ -162,11 +140,68 @@ function drawIcon(size) {
   return buildPNG(px, size);
 }
 
-const dir = path.join(__dirname, 'icons');
-if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+function drawIcon(size) {
+  if (size < 64) return drawSmallIcon(size);
+  const px = Buffer.alloc(size * size * 4);   // transparent
+  const cx = size / 2, cy = size / 2;
+  const grid = glyphGrid();
 
-[16, 48, 128].forEach(s => {
-  fs.writeFileSync(path.join(dir, `icon${s}.png`), drawIcon(s));
-  console.log(`✓ icons/icon${s}.png`);
-});
-console.log('Icons done!');
+  // squircle body
+  const pad = size * 0.035;
+  const hw  = size / 2 - pad;
+  const r   = size * 0.235;
+
+  // dot lattice inside the body
+  const inset = size * 0.15;
+  const cell  = (size - inset * 2) / GRID;
+  // small icons need fatter dots to survive downscaling
+  const dotR  = cell * (size <= 24 ? 0.46 : 0.34);
+  const feather = Math.max(size / 128 * 1.3, 0.75);
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      let R = 0, G = 0, B = 0, A = 0;
+
+      const bgA = aa(sdRoundRect(x + 0.5, y + 0.5, cx, cy, hw, hw, r), feather * 1.2);
+      if (bgA === 0) { px[i+3] = 0; continue; }
+      [R,G,B,A] = blend(R,G,B,A, BLACK[0],BLACK[1],BLACK[2], bgA);
+
+      // nearest lattice cell is enough — dots never overlap
+      const gx = Math.floor((x + 0.5 - inset) / cell);
+      const gy = Math.floor((y + 0.5 - inset) / cell);
+      if (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) {
+        const kind = grid[gy][gx];
+        if (kind) {
+          const dcx = inset + (gx + 0.5) * cell;
+          const dcy = inset + (gy + 0.5) * cell;
+          const dA  = aa(sdCircle(x + 0.5, y + 0.5, dcx, dcy, dotR), feather);
+          if (dA > 0) {
+            const c = kind === 2 ? RED : WHITE;
+            // clip the glyph to the body so dots never bleed past the corners
+            [R,G,B,A] = blend(R,G,B,A, c[0],c[1],c[2], Math.min(dA, bgA));
+          }
+        }
+      }
+
+      px[i]=R; px[i+1]=G; px[i+2]=B; px[i+3]=A;
+    }
+  }
+  return buildPNG(px, size);
+}
+
+// ── Run ──────────────────────────────────────────────────────
+if (process.argv.includes('--ascii')) {
+  console.log(glyphGrid()
+    .map(r => r.map(c => (c === 1 ? '@' : c === 2 ? 'o' : '.')).join(' '))
+    .join('\n'));
+} else {
+  const dir = path.join(__dirname, 'icons');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
+  [16, 48, 128].forEach(s => {
+    fs.writeFileSync(path.join(dir, `icon${s}.png`), drawIcon(s));
+    console.log(`✓ icons/icon${s}.png`);
+  });
+  console.log('Icons done.');
+}

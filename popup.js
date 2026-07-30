@@ -15,12 +15,12 @@ const hintCool    = document.getElementById('hint-cooldown');
 function save(key, value) { chrome.storage.sync.set({ [key]: value }); }
 
 function levelLabel(v, lo, hi) {
-  return v <= lo ? 'Low' : v >= hi ? 'High' : 'Med';
+  return v <= lo ? 'LOW' : v >= hi ? 'HIGH' : 'MED';
 }
 
 function refreshHints(s) {
-  hintSens.textContent = `${levelLabel(s.sensitivity,    0.25, 0.45)} (${(+s.sensitivity).toFixed(2)})`;
-  hintBrow.textContent = `${levelLabel(s.browSensitivity,0.22, 0.40)} (${(+s.browSensitivity).toFixed(2)})`;
+  hintSens.textContent = `${(+s.sensitivity).toFixed(2)} · ${levelLabel(s.sensitivity,     0.25, 0.45)}`;
+  hintBrow.textContent = `${(+s.browSensitivity).toFixed(2)} · ${levelLabel(s.browSensitivity, 0.22, 0.40)}`;
   hintCool.textContent = `${(s.cooldown / 1000).toFixed(1)}s`;
 }
 

@@ -7,12 +7,47 @@
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
+
   <header>
-    <span class="logo">👄</span>
+    <!-- dot-matrix mouth, same mark as the icon -->
+    <svg class="logo" viewBox="0 0 11 11" aria-hidden="true">
+      <g class="lip">
+        <circle cx="1.5" cy="3.5" r="0.44" /><circle cx="2.5" cy="3.5" r="0.44" />
+        <circle cx="3.5" cy="3.5" r="0.44" /><circle cx="4.5" cy="3.5" r="0.44" />
+        <circle cx="5.5" cy="3.5" r="0.44" /><circle cx="6.5" cy="3.5" r="0.44" />
+        <circle cx="7.5" cy="3.5" r="0.44" /><circle cx="8.5" cy="3.5" r="0.44" />
+        <circle cx="9.5" cy="3.5" r="0.44" />
+        <circle cx="0.5" cy="4.5" r="0.44" /><circle cx="1.5" cy="4.5" r="0.44" />
+        <circle cx="9.5" cy="4.5" r="0.44" /><circle cx="10.5" cy="4.5" r="0.44" />
+        <circle cx="0.5" cy="5.5" r="0.44" /><circle cx="1.5" cy="5.5" r="0.44" />
+        <circle cx="9.5" cy="5.5" r="0.44" /><circle cx="10.5" cy="5.5" r="0.44" />
+        <circle cx="1.5" cy="6.5" r="0.44" /><circle cx="2.5" cy="6.5" r="0.44" />
+        <circle cx="8.5" cy="6.5" r="0.44" /><circle cx="9.5" cy="6.5" r="0.44" />
+        <circle cx="2.5" cy="7.5" r="0.44" /><circle cx="3.5" cy="7.5" r="0.44" />
+        <circle cx="4.5" cy="7.5" r="0.44" /><circle cx="5.5" cy="7.5" r="0.44" />
+        <circle cx="6.5" cy="7.5" r="0.44" /><circle cx="7.5" cy="7.5" r="0.44" />
+        <circle cx="8.5" cy="7.5" r="0.44" />
+      </g>
+      <g class="open">
+        <circle cx="2.5" cy="4.5" r="0.44" /><circle cx="3.5" cy="4.5" r="0.44" />
+        <circle cx="4.5" cy="4.5" r="0.44" /><circle cx="5.5" cy="4.5" r="0.44" />
+        <circle cx="6.5" cy="4.5" r="0.44" /><circle cx="7.5" cy="4.5" r="0.44" />
+        <circle cx="8.5" cy="4.5" r="0.44" />
+        <circle cx="2.5" cy="5.5" r="0.44" /><circle cx="3.5" cy="5.5" r="0.44" />
+        <circle cx="4.5" cy="5.5" r="0.44" /><circle cx="5.5" cy="5.5" r="0.44" />
+        <circle cx="6.5" cy="5.5" r="0.44" /><circle cx="7.5" cy="5.5" r="0.44" />
+        <circle cx="8.5" cy="5.5" r="0.44" />
+        <circle cx="3.5" cy="6.5" r="0.44" /><circle cx="4.5" cy="6.5" r="0.44" />
+        <circle cx="5.5" cy="6.5" r="0.44" /><circle cx="6.5" cy="6.5" r="0.44" />
+        <circle cx="7.5" cy="6.5" r="0.44" />
+      </g>
+    </svg>
+
     <div class="title-wrap">
       <h1>MouthScroll</h1>
       <p class="subtitle">Hands-free Shorts &amp; Reels</p>
     </div>
+
     <!-- Master ON/OFF toggle -->
     <label class="toggle" title="Enable / Disable MouthScroll">
       <input type="checkbox" id="chk-enabled" />
@@ -76,9 +111,29 @@
   </section>
 
   <footer>
-    <p class="note">😮 open+close → next &nbsp;|&nbsp; 🤨 brows up → prev</p>
-    <p class="note">On YouTube videos: 😮 → pause/resume</p>
-    <p class="note dim">All processing is 100% local &amp; private.</p>
+
+    <!-- Gestures do different things per surface — spell both out -->
+    <div class="mode">
+      <p class="mode-name">Shorts &amp; Reels</p>
+      <div class="legend">
+        <span class="key">Mouth</span><span class="arrow">&rarr;</span><span class="act">Next video</span>
+      </div>
+      <div class="legend">
+        <span class="key">Brows</span><span class="arrow">&rarr;</span><span class="act">Previous video</span>
+      </div>
+    </div>
+
+    <div class="mode">
+      <p class="mode-name">Long YouTube videos</p>
+      <div class="legend">
+        <span class="key">Mouth</span><span class="arrow">&rarr;</span><span class="act">Play / pause</span>
+      </div>
+      <div class="legend">
+        <span class="key">Brows</span><span class="arrow">&rarr;</span><span class="act">Hold to skip +5<span class="unit">s</span></span>
+      </div>
+    </div>
+
+    <p class="note dim"><span class="live"></span>All processing is 100% local &amp; private</p>
   </footer>
 
   <script src="popup.js"></script>

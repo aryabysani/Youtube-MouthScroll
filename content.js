@@ -28,7 +28,8 @@
     sensitivity: 0.35,      // mouth open threshold (normalized)
     browSensitivity: 0.25,  // eyebrow raise threshold (normalized)
     showPreview: true,
-    cooldown: 1500
+    cooldown: 1500,
+    collapsed: false        // overlay minimized — persisted like the rest
   };
 
   let stream            = null;
@@ -53,6 +54,8 @@
   let browDot       = null;  // blue indicator dot
   let statusEl      = null;
   let modeLabelEl   = null;
+  let bodyEl        = null;
+  let collapseBtn   = null;
 
   // ── Euclidean distance ──────────────────────────────────────
   function dist(a, b) {
@@ -143,8 +146,8 @@
       });
     }
 
-    setStatus('⬇️ Next!');
-    setTimeout(() => setStatus('👀 Watching…'), 800);
+    setStatus('NEXT ▼');
+    setTimeout(() => setStatus('WATCHING'), 800);
   }
 
   // Scroll up (prev) — Shorts / Reels
@@ -172,8 +175,8 @@
       });
     }
 
-    setStatus('⬆️ Previous!');
-    setTimeout(() => setStatus('👀 Watching…'), 800);
+    setStatus('PREV ▲');
+    setTimeout(() => setStatus('WATCHING'), 800);
   }
 
   // Seek forward 5s — YouTube /watch (spams while brows held up)
@@ -193,7 +196,7 @@
       document.dispatchEvent(new KeyboardEvent('keydown',
         { key:'ArrowRight', keyCode:39, which:39, bubbles:true, cancelable:true }));
     }
-    setStatus('⏩ +5s');
+    setStatus('+5s ▶▶');
   }
 
   // Pause / Resume — YouTube /watch
@@ -202,15 +205,15 @@
     const video = document.querySelector('video.html5-main-video') ||
                   document.querySelector('video');
     if (video) {
-      if (video.paused) { video.play(); setStatus('▶️ Resumed'); playTone(600, 900, 0.08); }
-      else              { video.pause(); setStatus('⏸️ Paused'); playTone(900, 400, 0.12); }
+      if (video.paused) { video.play(); setStatus('RESUMED ▶'); playTone(600, 900, 0.08); }
+      else              { video.pause(); setStatus('PAUSED ‖'); playTone(900, 400, 0.12); }
     } else {
       // Fallback: press 'k' (YouTube keyboard shortcut)
       document.dispatchEvent(new KeyboardEvent('keydown',
         { key:'k', keyCode:75, bubbles:true, cancelable:true }));
     }
     flashDot(mouthDot, 'ms-triggered');
-    setTimeout(() => setStatus('👀 Watching…'), 1200);
+    setTimeout(() => setStatus('WATCHING'), 1200);
   }
 
   function blurActiveInput() {
@@ -227,7 +230,25 @@
     overlayEl.id = 'ms-overlay';
     overlayEl.innerHTML = `
       <div id="ms-header">
-        <span id="ms-logo">👄</span>
+        <svg id="ms-logo" viewBox="0 0 11 5" aria-hidden="true">
+          <g fill="currentColor">
+            <circle cx="1.5" cy="0.5" r="0.42"/><circle cx="2.5" cy="0.5" r="0.42"/>
+            <circle cx="3.5" cy="0.5" r="0.42"/><circle cx="4.5" cy="0.5" r="0.42"/>
+            <circle cx="5.5" cy="0.5" r="0.42"/><circle cx="6.5" cy="0.5" r="0.42"/>
+            <circle cx="7.5" cy="0.5" r="0.42"/><circle cx="8.5" cy="0.5" r="0.42"/>
+            <circle cx="9.5" cy="0.5" r="0.42"/>
+            <circle cx="0.5" cy="1.5" r="0.42"/><circle cx="1.5" cy="1.5" r="0.42"/>
+            <circle cx="9.5" cy="1.5" r="0.42"/><circle cx="10.5" cy="1.5" r="0.42"/>
+            <circle cx="0.5" cy="2.5" r="0.42"/><circle cx="1.5" cy="2.5" r="0.42"/>
+            <circle cx="9.5" cy="2.5" r="0.42"/><circle cx="10.5" cy="2.5" r="0.42"/>
+            <circle cx="1.5" cy="3.5" r="0.42"/><circle cx="2.5" cy="3.5" r="0.42"/>
+            <circle cx="8.5" cy="3.5" r="0.42"/><circle cx="9.5" cy="3.5" r="0.42"/>
+            <circle cx="2.5" cy="4.5" r="0.42"/><circle cx="3.5" cy="4.5" r="0.42"/>
+            <circle cx="4.5" cy="4.5" r="0.42"/><circle cx="5.5" cy="4.5" r="0.42"/>
+            <circle cx="6.5" cy="4.5" r="0.42"/><circle cx="7.5" cy="4.5" r="0.42"/>
+            <circle cx="8.5" cy="4.5" r="0.42"/>
+          </g>
+        </svg>
         <span id="ms-title">MouthScroll</span>
         <button id="ms-collapse" title="Minimize">−</button>
       </div>
@@ -237,16 +258,16 @@
           <div id="ms-dots">
             <div class="ms-dot-wrap">
               <div id="ms-mouth-dot" class="ms-dot" title="Mouth"></div>
-              <span>👄</span>
+              <span>MTH</span>
             </div>
             <div class="ms-dot-wrap">
               <div id="ms-brow-dot" class="ms-dot" title="Brows"></div>
-              <span>🤨</span>
+              <span>BRW</span>
             </div>
           </div>
         </div>
         <div id="ms-mode-label">—</div>
-        <div id="ms-status">Loading…</div>
+        <div id="ms-status">LOADING</div>
       </div>
     `;
     document.body.appendChild(overlayEl);
@@ -257,27 +278,38 @@
     statusEl     = overlayEl.querySelector('#ms-status');
     modeLabelEl  = overlayEl.querySelector('#ms-mode-label');
 
-    const collapseBtn = overlayEl.querySelector('#ms-collapse');
-    const body = overlayEl.querySelector('#ms-body');
+    collapseBtn = overlayEl.querySelector('#ms-collapse');
+    bodyEl      = overlayEl.querySelector('#ms-body');
     collapseBtn.addEventListener('click', () => {
-      const hidden = body.style.display === 'none';
-      body.style.display = hidden ? '' : 'none';
-      collapseBtn.textContent = hidden ? '−' : '+';
+      settings.collapsed = !settings.collapsed;
+      applyCollapsed();
+      chrome.storage.sync.set({ collapsed: settings.collapsed });
     });
 
     makeDraggable(overlayEl, overlayEl.querySelector('#ms-header'));
     applyPreviewVisibility();
+    applyCollapsed();
     updateModeLabel();
   }
 
+  // Gestures mean different things per surface, so name the surface and spell
+  // out what the two gestures do there. [badge, gestures] — all literals.
   function updateModeLabel() {
     if (!modeLabelEl) return;
     const labels = {
-      'youtube':       '▼ next  ▲ brows  (Shorts)',
-      'youtube-video': '👄 pause/resume · 🤨 hold = +5s',
-      'instagram':     '▼ next  ▲ brows  (Reels)',
+      'youtube':       ['SHORTS', 'MTH ▼ NEXT · BRW ▲ PREV'],
+      'youtube-video': ['VIDEO',  'MTH ▶ PAUSE · BRW +5s'],
+      'instagram':     ['REELS',  'MTH ▼ NEXT · BRW ▲ PREV'],
     };
-    modeLabelEl.textContent = labels[platform] || '—';
+    const entry = labels[platform];
+    modeLabelEl.textContent = '';
+    if (!entry) { modeLabelEl.textContent = '—'; return; }
+
+    const tag = document.createElement('span');
+    tag.className   = 'ms-mode-tag';
+    tag.textContent = entry[0];
+    modeLabelEl.appendChild(tag);
+    modeLabelEl.appendChild(document.createTextNode(entry[1]));
   }
 
   function setStatus(msg) { if (statusEl) statusEl.textContent = msg; }
@@ -285,6 +317,13 @@
   function applyPreviewVisibility() {
     const wrap = document.getElementById('ms-preview-wrap');
     if (wrap) wrap.style.display = settings.showPreview ? '' : 'none';
+  }
+
+  function applyCollapsed() {
+    if (!bodyEl || !collapseBtn) return;
+    bodyEl.style.display   = settings.collapsed ? 'none' : '';
+    collapseBtn.textContent = settings.collapsed ? '+' : '−';
+    collapseBtn.title       = settings.collapsed ? 'Expand' : 'Minimize';
   }
 
   function makeDraggable(el, handle) {
@@ -313,7 +352,7 @@
       return true;
     } catch (err) {
       console.error('[MouthScroll] Model load failed:', err);
-      setStatus('❌ Models missing — run download_models.js');
+      setStatus('MODELS MISSING');
       return false;
     }
   }
@@ -327,7 +366,7 @@
       });
       return stream;
     } catch (err) {
-      setStatus('❌ Camera access denied');
+      setStatus('CAMERA DENIED');
       return null;
     }
   }
@@ -367,7 +406,7 @@
         // ── Mouth state machine ──────────────────────────────
         if (isOpen && !mouthWasOpen) {
           mouthWasOpen = true;
-          setStatus(`😮 Mouth open (${mouth.toFixed(2)})`);
+          setStatus(`MOUTH OPEN · ${mouth.toFixed(2)}`);
         } else if (!isOpen && mouthWasOpen) {
           mouthWasOpen = false;
           if (platform === 'youtube-video') togglePlayback();
@@ -381,14 +420,14 @@
             browWasRaised = true;
             seekForward5(); // internally rate-limited to 500 ms
           } else {
-            if (browWasRaised) setStatus('👀 Watching…');
+            if (browWasRaised) setStatus('WATCHING');
             browWasRaised = false;
           }
         } else {
           // Shorts / Reels: raise→lower cycle = scroll prev
           if (isRaised && !browWasRaised) {
             browWasRaised = true;
-            setStatus(`🤨 Brows up! (${brow.toFixed(2)})`);
+            setStatus(`BROWS UP · ${brow.toFixed(2)}`);
           } else if (!isRaised && browWasRaised) {
             browWasRaised = false;
             scrollPrev();
@@ -397,13 +436,13 @@
 
         // Always show live readings when fully idle (nothing active)
         if (!isOpen && !mouthWasOpen && !isRaised && !browWasRaised) {
-          setStatus(`👄 ${mouth.toFixed(2)}  🤨 ${brow.toFixed(2)}  [thresh ${settings.browSensitivity.toFixed(2)}]`);
+          setStatus(`MTH ${mouth.toFixed(2)} · BRW ${brow.toFixed(2)} · THR ${settings.browSensitivity.toFixed(2)}`);
         }
 
       } else {
         if (mouthDot) mouthDot.classList.remove('ms-active');
         if (browDot)  browDot.classList.remove('ms-active-brow');
-        setStatus('🔍 No face detected');
+        setStatus('NO FACE');
         mouthWasOpen = false;
         browWasRaised = false;
       }
@@ -417,11 +456,11 @@
     if (!platform || isRunning) return;
 
     buildOverlay();
-    setStatus('Loading models…');
+    setStatus('LOADING MODELS');
 
     if (!await loadModels()) return;
 
-    setStatus('Requesting camera…');
+    setStatus('REQUESTING CAMERA');
     if (!await startCamera()) return;
 
     if (!videoEl) {
@@ -437,7 +476,7 @@
 
     isRunning = true;
     updateModeLabel();
-    setStatus('👀 Watching…');
+    setStatus('WATCHING');
     detectionLoop();
   }
 
@@ -447,14 +486,16 @@
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (stream) { stream.getTracks().forEach(t=>t.stop()); stream = null; }
     if (videoEl)  { videoEl.srcObject = null; }
-    if (overlayEl){ overlayEl.remove(); overlayEl=previewEl=mouthDot=browDot=statusEl=modeLabelEl=null; }
+    if (overlayEl){ overlayEl.remove();
+      overlayEl=previewEl=mouthDot=browDot=statusEl=modeLabelEl=bodyEl=collapseBtn=null; }
     mouthWasOpen = false; browWasRaised = false;
   }
 
   // ── Settings ─────────────────────────────────────────────────
   function loadSettings(cb) {
     chrome.storage.sync.get(
-      { enabled:true, sensitivity:0.35, browSensitivity:0.30, showPreview:true, cooldown:1500 },
+      { enabled:true, sensitivity:0.35, browSensitivity:0.30, showPreview:true,
+        cooldown:1500, collapsed:false },
       s => { Object.assign(settings, s); cb && cb(); }
     );
   }
@@ -464,6 +505,7 @@
     if (changes.browSensitivity) settings.browSensitivity = changes.browSensitivity.newValue;
     if (changes.showPreview)   { settings.showPreview     = changes.showPreview.newValue; applyPreviewVisibility(); }
     if (changes.cooldown)        settings.cooldown        = changes.cooldown.newValue;
+    if (changes.collapsed != null) { settings.collapsed   = changes.collapsed.newValue; applyCollapsed(); }
     if (changes.enabled != null) {
       settings.enabled = changes.enabled.newValue;
       settings.enabled && platform ? start() : stop();
