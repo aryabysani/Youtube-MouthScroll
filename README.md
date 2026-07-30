@@ -1,173 +1,224 @@
-# 👄 MouthScroll
+<div align="center">
 
-**Scroll YouTube with your mouth. No hands required.**
+<img src="assets/banner.png" alt="MouthScroll" width="100%">
+
+### SCROLL YOUTUBE WITH YOUR MOUTH. NO HANDS REQUIRED.
+
+<img src="https://img.shields.io/badge/CHROME-MANIFEST%20V3-0a0a0a?style=flat-square&labelColor=0a0a0a" alt="Manifest V3">
+<img src="https://img.shields.io/badge/DEPENDENCIES-0-0a0a0a?style=flat-square&labelColor=0a0a0a" alt="Zero dependencies">
+<img src="https://img.shields.io/badge/PROCESSING-100%25%20LOCAL-d71921?style=flat-square&labelColor=0a0a0a" alt="100% local">
+<img src="https://img.shields.io/badge/LICENSE-MIT-0a0a0a?style=flat-square&labelColor=0a0a0a" alt="MIT License">
+
+</div>
+
+<br>
 
 Open your mouth to skip to the next video. Raise your eyebrows to go back.
 Works on YouTube Shorts, Instagram Reels, and normal long YouTube videos.
 
 Everything runs on your own computer. No video ever leaves your browser.
 
----
-
-## What the gestures do
-
-The same two gestures do different things depending on what you're watching.
-
-**Shorts &amp; Reels**
-
-| Gesture | Action |
-|---|---|
-| 😮 Open your mouth, then close it | Next video |
-| 🤨 Raise your eyebrows | Previous video |
-
-**Long YouTube videos**
-
-| Gesture | Action |
-|---|---|
-| 😮 Open your mouth, then close it | Play / pause |
-| 🤨 Hold your eyebrows up | Skip forward 5 seconds |
-
-The panel on the page always shows which mode you're in.
+<br>
 
 ---
 
-## How to install (about 3 minutes)
+## `01` &nbsp; THE GESTURES
 
-You only need Google Chrome. No coding, no terminal.
+Two gestures. What they do depends on what you're watching.
 
-### Step 1 — Download the extension
+<table>
+<tr>
+<td width="50%" valign="top">
 
-1. Scroll to the top of this page.
-2. Click the green **`< > Code`** button.
-3. Click **Download ZIP**.
-4. The file lands in your **Downloads** folder.
+**`SHORTS & REELS`**
 
-### Step 2 — Unzip it
+<kbd>MOUTH</kbd> &nbsp;→&nbsp; Next video
 
-- **Windows:** right-click the ZIP file → **Extract All** → **Extract**
-- **Mac:** double-click the ZIP file
+<kbd>BROWS</kbd> &nbsp;→&nbsp; Previous video
 
-You now have a folder called **`Youtube-MouthScroll-main`**. **Don't delete or
-move this folder after installing** — Chrome loads the extension from it every
-time.
+</td>
+<td width="50%" valign="top">
 
-> Tip: drag the folder somewhere permanent, like your Documents folder, before
-> continuing.
+**`LONG YOUTUBE VIDEOS`**
 
-### Step 3 — Open Chrome's extensions page
+<kbd>MOUTH</kbd> &nbsp;→&nbsp; Play / pause
 
-1. Open Chrome.
-2. Click the **puzzle piece icon** 🧩 in the top-right corner.
-3. Click **Manage extensions** at the bottom of that menu.
+<kbd>BROWS</kbd> &nbsp;→&nbsp; Hold to skip +5s
 
-(Or type `chrome://extensions` in the address bar and press Enter.)
+</td>
+</tr>
+</table>
 
-### Step 4 — Turn on Developer mode
+<kbd>MOUTH</kbd> means open it, then close it. The panel on the page always
+shows which mode you're in.
 
-In the **top-right** of the extensions page, flip the **Developer mode** switch
-**ON**. Three new buttons appear at the top-left.
+<br>
 
-### Step 5 — Load the extension
+---
 
-1. Click **Load unpacked** (top-left).
-2. Find the folder you unzipped in Step 2.
-3. Open the **`Youtube-MouthScroll-main`** folder so you can see the files
-   inside it — you should see `manifest.json`, `popup.html`, and some others.
-4. Click **Select Folder** (Windows) or **Select** (Mac).
+## `02` &nbsp; INSTALL
 
-**Important:** pick the folder that *contains* `manifest.json`. If Chrome says
-"Manifest file is missing or unreadable," you selected the wrong folder — try
-one level in, or one level out.
+About three minutes. You only need Google Chrome — no coding, no terminal.
+
+<br>
+
+**`STEP 1`** &nbsp; **Download**
+
+Scroll to the top of this page → click the green **`< > Code`** button →
+click **Download ZIP**. It lands in your **Downloads** folder.
+
+<br>
+
+**`STEP 2`** &nbsp; **Unzip**
+
+- **Windows** — right-click the ZIP → **Extract All** → **Extract**
+- **Mac** — double-click the ZIP
+
+You now have a folder called **`Youtube-MouthScroll-main`**.
+
+> [!IMPORTANT]
+> Don't delete or move this folder after installing. Chrome loads the
+> extension from it every time. Drag it somewhere permanent — like Documents —
+> before you continue.
+
+<br>
+
+**`STEP 3`** &nbsp; **Open Chrome's extensions page**
+
+Click the puzzle piece **🧩** in the top-right corner → **Manage extensions**.
+
+Or type `chrome://extensions` in the address bar and press Enter.
+
+<br>
+
+**`STEP 4`** &nbsp; **Turn on Developer mode**
+
+Flip the **Developer mode** switch in the **top-right**. Three new buttons
+appear at the top-left.
+
+<br>
+
+**`STEP 5`** &nbsp; **Load unpacked**
+
+Click **Load unpacked** → find the folder from Step 2 → open
+**`Youtube-MouthScroll-main`** so you can see `manifest.json` inside it →
+click **Select Folder** (Windows) or **Select** (Mac).
+
+> [!TIP]
+> Pick the folder that *contains* `manifest.json`. If Chrome says
+> "Manifest file is missing or unreadable," you picked the wrong one — try one
+> level in, or one level out.
 
 Nothing else to download. The face-detection library and its model files are
-already included in this repo.
+already in this repo.
 
-### Step 6 — Pin it (optional but handy)
+<br>
 
-Click the puzzle piece 🧩 again, then click the **pin** icon next to
-MouthScroll so its icon stays visible in your toolbar.
+**`STEP 6`** &nbsp; **Pin it** *(optional)*
+
+Click the puzzle piece **🧩** again → click the **pin** icon next to
+MouthScroll, so it stays visible in your toolbar.
+
+<br>
 
 ---
 
-## How to use it
+## `03` &nbsp; USE IT
 
-1. Go to YouTube Shorts, Instagram Reels, or any YouTube video.
-2. A small MouthScroll panel appears in the bottom-right corner.
-3. Chrome asks to use your camera — click **Allow**.
-4. Start making faces at your screen.
+Go to YouTube Shorts, Instagram Reels, or any YouTube video. A small panel
+appears in the bottom-right. Chrome asks for your camera — click **Allow**.
 
-Click the extension's toolbar icon for settings:
+Then start making faces at your screen.
+
+Click the toolbar icon for settings:
 
 | Setting | What it does |
-|---|---|
-| **ON / OFF** | Turns MouthScroll off completely, camera included |
-| **Sensitivity** | How wide you have to open your mouth |
-| **Brow sensitivity** | How far you have to raise your eyebrows |
-| **Cooldown** | How long to wait before it can trigger again |
-| **Show camera preview** | Show or hide the little camera window |
+|:--|:--|
+| **`ON / OFF`** | Turns MouthScroll off completely, camera included |
+| **`SENSITIVITY`** | How wide you have to open your mouth |
+| **`BROW SENSITIVITY`** | How far you have to raise your eyebrows |
+| **`COOLDOWN`** | How long to wait before it can trigger again |
+| **`SHOW CAMERA PREVIEW`** | Show or hide the little camera window |
 
-Your settings are remembered, including the ON/OFF switch. If you turn
-MouthScroll off, it stays off until you turn it back on.
+Your settings are remembered, the ON/OFF switch included. Turn MouthScroll
+off and it stays off until you turn it back on.
+
+<br>
 
 ---
 
-## If something isn't working
+## `04` &nbsp; TROUBLESHOOTING
 
-| Problem | What to do |
-|---|---|
-| Nothing appears on the page | Refresh the page, then check the extension is toggled ON in the popup |
-| Camera didn't ask for permission | Click the camera icon 📷 in Chrome's address bar and choose **Allow** |
-| It doesn't notice my face | Turn on a light in front of you and sit closer to the camera |
+| Problem | Fix |
+|:--|:--|
+| Nothing appears on the page | Refresh the page, then check it's toggled ON in the popup |
+| Camera never asked for permission | Click the camera icon **📷** in Chrome's address bar → **Allow** |
+| It doesn't notice my face | Put a light in front of you and sit closer to the camera |
 | It triggers when I didn't mean to | Drag **Sensitivity** toward **Low**, or **Cooldown** toward **Slow** |
 | It ignores me when I open my mouth | Drag **Sensitivity** toward **High** |
-| "Manifest file is missing or unreadable" | Wrong folder in Step 5 — pick the one containing `manifest.json` |
-| The extension disappeared | You moved or deleted the unzipped folder. Put it back, or repeat Step 5 |
+| "Manifest file is missing or unreadable" | Wrong folder in Step 5 — pick the one holding `manifest.json` |
+| The extension disappeared | You moved or deleted the unzipped folder. Put it back, or redo Step 5 |
+
+<br>
 
 ---
 
-## Privacy
+## `05` &nbsp; PRIVACY
 
-- Face detection runs **entirely on your own computer**, in your browser.
-- **No video, images, or face data are ever sent anywhere.** There is no server.
+> [!NOTE]
+> There is no server. There is no account. There is nothing to opt out of.
+
+- Face detection runs **entirely on your own computer**, inside your browser.
+- **No video, images, or face data are ever sent anywhere.**
 - The camera only runs while you're on a supported page with the extension on.
-- The only thing stored is your settings, via Chrome's own settings sync.
+- The only thing stored is your settings, through Chrome's own settings sync.
 
-The extension asks for camera access and permission to run on `youtube.com` and
-`instagram.com`. That's all it can reach — see [manifest.json](manifest.json).
+The extension asks for camera access and permission to run on `youtube.com`
+and `instagram.com`. That is the full extent of what it can reach — see
+[manifest.json](manifest.json).
+
+<br>
 
 ---
 
-## For developers
+## `06` &nbsp; FOR DEVELOPERS
 
-Plain JavaScript, no build step. Chrome Manifest V3.
+Plain JavaScript. No build step, no bundler, no npm packages.
 
 | File | Purpose |
-|---|---|
-| `manifest.json` | Extension manifest |
+|:--|:--|
+| `manifest.json` | Extension manifest — Chrome Manifest V3 |
 | `content.js` | Face tracking, gesture state machines, page overlay |
 | `content.css` | Overlay styling |
-| `popup.html` / `popup.css` / `popup.js` | Toolbar settings panel |
-| `background.js` | Service worker: default settings, SPA navigation events |
-| `gen_icons_node.js` | Generates the icon PNGs (no dependencies) |
-| `download_models.js` | Re-downloads face-api.js and its models |
-| `libs/`, `models/` | Vendored face-api.js and its weights (committed) |
+| `popup.*` | Toolbar settings panel |
+| `background.js` | Service worker — default settings, SPA navigation events |
+| `gen_icons_node.js` | Generates `icons/` |
+| `gen_banner_node.js` | Generates the banner at the top of this file |
+| `download_models.js` | Re-downloads face-api.js and its weights |
+| `libs/`, `models/` | Vendored face-api.js and weights, committed on purpose |
 
 ```bash
 node gen_icons_node.js           # regenerate icons/
 node gen_icons_node.js --ascii   # preview the icon glyph as text
+node gen_banner_node.js          # regenerate assets/banner.png
 node download_models.js          # re-fetch libs/ and models/
 ```
 
-Gesture detection uses face-api.js `TinyFaceDetector` +
-`FaceLandmark68TinyNet`. Mouth openness and brow raise are both normalised
-against eye-corner distance, so they hold up as you move nearer or further
-from the camera.
+Detection uses face-api.js `TinyFaceDetector` + `FaceLandmark68TinyNet`.
+Mouth openness and brow raise are both normalised against eye-corner distance,
+so they hold up as you move nearer to or further from the camera.
 
-See [SETUP.md](SETUP.md) for project structure and
-[CONTRIBUTING.md](CONTRIBUTING.md) if you'd like to help.
+More in [SETUP.md](SETUP.md). Contributions welcome —
+see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+<br>
 
 ---
 
-## License
+<div align="center">
+<br>
 
-[MIT](LICENSE) — do what you like with it.
+**[MIT](LICENSE)** &nbsp;·&nbsp; Do what you like with it.
+
+<br>
+</div>
