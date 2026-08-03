@@ -100,14 +100,17 @@ appear at the top-left.
 
 **`STEP 5`** &nbsp; **Load unpacked**
 
-Click **Load unpacked** → find the folder from Step 2 → open
-**`Youtube-MouthScroll-main`** so you can see `manifest.json` inside it →
-click **Select Folder** (Windows) or **Select** (Mac).
+Click **Load unpacked**, select the **`Youtube-MouthScroll-main`** folder from
+Step 2, and click **Select Folder** (Windows) or **Select** (Mac).
+
+That's the whole step — pick that one folder. Don't open it first, and don't
+pick any folder inside it.
 
 > [!TIP]
-> Pick the folder that *contains* `manifest.json`. If Chrome says
-> "Manifest file is missing or unreadable," you picked the wrong one — try one
-> level in, or one level out.
+> **Windows only:** "Extract All" sometimes creates a folder inside a folder,
+> both named `Youtube-MouthScroll-main`. If Chrome says *"Manifest file is
+> missing or unreadable,"* that's what happened — pick the **inner** one, the
+> one with `manifest.json` sitting directly inside it.
 
 Nothing else to download. The face-detection library and its model files are
 already in this repo.
@@ -156,7 +159,7 @@ off and it stays off until you turn it back on.
 | It doesn't notice my face | Put a light in front of you and sit closer to the camera |
 | It triggers when I didn't mean to | Drag **Sensitivity** toward **Low**, or **Cooldown** toward **Slow** |
 | It ignores me when I open my mouth | Drag **Sensitivity** toward **High** |
-| "Manifest file is missing or unreadable" | Wrong folder in Step 5 — pick the one holding `manifest.json` |
+| "Manifest file is missing or unreadable" | Wrong folder in Step 5. Pick the `Youtube-MouthScroll-main` folder with `manifest.json` directly inside it — on Windows, check for a folder of the same name nested inside |
 | The extension disappeared | You moved or deleted the unzipped folder. Put it back, or redo Step 5 |
 
 <br>
